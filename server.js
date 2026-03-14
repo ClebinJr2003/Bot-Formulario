@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import session from "express-session";
-import Database from "better-sqlite3";
+//import Database from "better-sqlite3";   // import Database from "better-sqlite3";
 import { google } from "googleapis";
 import {
   Client,
@@ -272,7 +272,7 @@ async function appendApprovedToSheet({
 }
 
 // ================== BANCO (SQLite) ==================
-const db = new Database("./recrutamento.sqlite");
+//const db = new Database("./recrutamento.sqlite");
 
 db.exec(`
 CREATE TABLE IF NOT EXISTS applications (
