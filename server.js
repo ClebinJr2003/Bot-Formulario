@@ -33,7 +33,8 @@ app.use(express.json());
 app.use((req, res, next) => {
   const allowedOrigins = [
     process.env.SITE_URL || "",
-    process.env.ADMIN_URL || ""
+    process.env.ADMIN_URL || "",
+    "https://recrutamento-gpv.vercel.app"
   ].filter(Boolean);
 
   const origin = req.headers.origin;
@@ -272,7 +273,7 @@ async function appendApprovedToSheet({
 }
 
 // ================== BANCO (SQLite) ==================
-const db = new Database("./recrutamento.sqlite");
+const db = new Database(process.env.SQLITE_PATH || "/tmp/recrutamento.sqlite");
 
 db.exec(`
 CREATE TABLE IF NOT EXISTS applications (
@@ -424,7 +425,7 @@ async function startBotIfNeeded() {
 // ================== SESSÃO / STATIC ==================
 app.use(
   session({
-    secret: SESSION_SECRET || "dev_secret_change_me",
+    secret: SESSION_SECRET || "dev_secret_change_me", // defina SESSION_SECRET no Render
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -817,7 +818,14 @@ app.get("/api/status", requireDiscordAuth, async (req, res) => {
   }
 });
 
-app.get("/health", (req, res) => res.json({ ok: true }));
+app.get("/health", (req, res) => {
+  res.json({
+    ok: true,
+    uptime: process.uptime(),
+    botStarted,
+    time: new Date().toISOString()
+  });
+});
 
 // ================== PAINEL ADMIN / RECRUTADOR ==================
 app.get("/api/panel/me", requirePanelAccess, async (req, res) => {
@@ -1123,7 +1131,7 @@ app.get("/auth/discord", (req, res) => {
     client_id: DISCORD_CLIENT_ID,
     redirect_uri: DISCORD_REDIRECT_URI,
     response_type: "code",
-    scope: "identify",
+    scope: "identify guilds",
     state
   });
 
