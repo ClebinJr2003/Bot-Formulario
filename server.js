@@ -1946,8 +1946,10 @@ app.use((err, req, res, next) => {
 });
 
 // ================== START (SITE SEMPRE) ==================
+const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
-  console.log(`🌐 Site rodando em: ${BASE_URL}`);
+  console.log("Servidor rodando na porta", PORT);
 });
 
 // ❗️não damos client.login aqui (sob demanda)
