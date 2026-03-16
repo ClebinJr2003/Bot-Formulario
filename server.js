@@ -494,8 +494,10 @@ function canAccessPanel(member) {
 async function requirePanelAccess(req, res, next) {
   try {
     const userId = req.session?.discordUser?.id;
+
+    // se não estiver logado redireciona para login
     if (!userId) {
-      return res.status(401).json({ ok: false, error: "Faça login com Discord." });
+      return res.redirect("/auth/discord");
     }
 
     await startBotIfNeeded();
