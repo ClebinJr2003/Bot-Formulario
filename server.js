@@ -525,11 +525,28 @@ function canManageTicket(member) {
   return allInstrutoresSet().has(member.id);
 }
 
+
 function disabledActionRow(reasonLabel = "Expirado") {
+
+  let approveLabel = "✅ Aprovar";
+
+  if (reasonLabel === "Aprovado") approveLabel = "✅ Aprovado";
+  if (reasonLabel === "Reprovado") approveLabel = "❌ Resolvido";
+
   return new ActionRowBuilder().addComponents(
-    new ButtonBuilder().setCustomId("aprovar").setLabel("✅ Aprovar").setStyle(ButtonStyle.Success).setDisabled(true),
-    new ButtonBuilder().setCustomId("reprovar").setLabel(`❌ Reprovar (${reasonLabel})`).setStyle(ButtonStyle.Danger).setDisabled(true)
+    new ButtonBuilder()
+      .setCustomId("aprovar")
+      .setLabel(approveLabel)
+      .setStyle(ButtonStyle.Success)
+      .setDisabled(true),
+
+    new ButtonBuilder()
+      .setCustomId("reprovar")
+      .setLabel(`❌ Reprovar (${reasonLabel})`)
+      .setStyle(ButtonStyle.Danger)
+      .setDisabled(true)
   );
+
 }
 
 function confirmRow(actionMessageId) {
@@ -1436,10 +1453,16 @@ async function handleDecision({ actionMessageId, decidedById, isAprovar, motivo 
     const record = dbRecord || applications.get(actionMessageId);
 
     if (!record) {
+
       processingLocks.delete(actionMessageId);
+
       if (interaction && !interaction.replied && !interaction.deferred) {
-        await interaction.reply({ content: "⚠️ Não achei os dados dessa inscrição.", ephemeral: true }).catch(() => null);
+        await interaction.reply({
+          content: "⚠️ Essa inscrição já foi processada ou o bot reiniciou.",
+          ephemeral: true
+        }).catch(() => null);
       }
+
       return;
     }
 
