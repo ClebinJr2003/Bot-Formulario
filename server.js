@@ -32,10 +32,11 @@ const app = express();
 app.use(express.json());
 app.use((req, res, next) => {
   const allowedOrigins = [
-    process.env.SITE_URL || "",
-    process.env.ADMIN_URL || "",
-    "https://recrutamento-gpv.vercel.app"
-  ].filter(Boolean);
+  process.env.SITE_URL || "",
+  process.env.ADMIN_URL || "",
+  "https://recrutamento-gpv.vercel.app",
+  "https://recrutamento-gpv-clebinjr2003s-projects.vercel.app"
+].filter(Boolean);
 
   const origin = req.headers.origin;
 
