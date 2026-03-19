@@ -435,7 +435,7 @@ app.use(
     proxy: true,
     cookie: {
       httpOnly: true,
-      sameSite: "lax",
+      sameSite: "none",
       secure: true,
       maxAge: 1000 * 60 * 60 * 24
     }
@@ -1041,7 +1041,6 @@ app.get("/auth/discord", (req, res) => {
   });
 
   res.redirect(`https://discord.com/api/oauth2/authorize?${params.toString()}`);
-});
 
 // ================== OAUTH CALLBACK ==================
 app.get("/auth/discord/callback", async (req, res) => {
