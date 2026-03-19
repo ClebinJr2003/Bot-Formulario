@@ -36,7 +36,6 @@ app.use((req, res, next) => {
     process.env.ADMIN_URL || "",
     "https://recrutamento-gpv.vercel.app",
     "https://recrutamento-gpv.vercel.app/admin.html",
-    "https://recrutamento-gpv-clebinjr2003s-projects.vercel.app"
   ].filter(Boolean);
 
   const origin = req.headers.origin;
