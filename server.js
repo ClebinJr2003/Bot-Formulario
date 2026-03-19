@@ -1021,26 +1021,6 @@ app.get("/auth/discord", (req, res) => {
   });
 });
 
-  //  anti-spam: impede iniciar OAuth em sequência
-  const now = Date.now();
-  const last = req.session.lastOauthStartAt || 0;
-  if (now - last < 2500) {
-    return res.redirect(`/error/rate_limit?sec=3`);
-  }
-  req.session.lastOauthStartAt = now;
-
-  const state = Math.random().toString(36).slice(2);
-  req.session.oauthState = state;
-
-  const params = new URLSearchParams({
-    client_id: DISCORD_CLIENT_ID,
-    redirect_uri: DISCORD_REDIRECT_URI,
-    response_type: "code",
-    scope: "identify guilds",
-    state
-  });
-
-  res.redirect(`https://discord.com/api/oauth2/authorize?${params.toString()}`);
 
 // ================== OAUTH CALLBACK ==================
 app.get("/auth/discord/callback", async (req, res) => {
