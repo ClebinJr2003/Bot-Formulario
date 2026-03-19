@@ -27,7 +27,7 @@ import {
  * - Espera o bot ficar READY antes de usar client.channels/guilds
  */
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 const app = express();
 app.use(express.json());
 app.use((req, res, next) => {
@@ -1824,10 +1824,8 @@ app.use((err, req, res, next) => {
 });
 
 // ================== START (SITE SEMPRE) ==================
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log("Servidor rodando na porta", PORT);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log("Servidor rodando na porta " + PORT);
 });
 
 // ❗️não damos client.login aqui (sob demanda)
