@@ -425,15 +425,19 @@ async function startBotIfNeeded() {
 }
 
 // ================== SESSÃO / STATIC ==================
+app.set("trust proxy", 1);
+
 app.use(
   session({
-    secret: SESSION_SECRET || "dev_secret_change_me", // defina SESSION_SECRET no Render
+    secret: SESSION_SECRET || "dev_secret_change_me",
     resave: false,
     saveUninitialized: false,
+    proxy: true,
     cookie: {
       httpOnly: true,
       sameSite: "none",
-      secure: true
+      secure: true,
+      maxAge: 1000 * 60 * 60 * 24
     }
   })
 );
@@ -987,6 +991,35 @@ app.get("/auth/discord", (req, res) => {
   if (!DISCORD_CLIENT_ID || !DISCORD_REDIRECT_URI) {
     return res.status(500).send("OAuth não configurado. Falta DISCORD_CLIENT_ID ou DISCORD_REDIRECT_URI.");
   }
+
+  const now = Date.now();
+  const last = req.session.lastOauthStartAt || 0;
+  if (now - last < 2500) {
+    return res.redirect(`/error/rate_limit?sec=3`);
+  }
+
+  req.session.lastOauthStartAt = now;
+
+  const state = Math.random().toString(36).slice(2);
+  req.session.oauthState = state;
+
+  const params = new URLSearchParams({
+    client_id: DISCORD_CLIENT_ID,
+    redirect_uri: DISCORD_REDIRECT_URI,
+    response_type: "code",
+    scope: "identify guilds",
+    state
+  });
+
+  req.session.save((err) => {
+    if (err) {
+      console.error("Erro ao salvar sessão OAuth:", err);
+      return res.status(500).send("Erro ao iniciar login do Discord.");
+    }
+
+    res.redirect(`https://discord.com/api/oauth2/authorize?${params.toString()}`);
+  });
+});
 
   //  anti-spam: impede iniciar OAuth em sequência
   const now = Date.now();
