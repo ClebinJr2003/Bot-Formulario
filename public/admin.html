@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Painel GPV</title>
+<style>
+:root{
+  --bg:#07111f;
+  --panel:#0d1a2b;
+  --panel-2:#101f34;
+  --border:rgba(212,175,55,.22);
+  --text:#f8fafc;
+  --muted:#9fb0cc;
+  --gold:#d4af37;
+  --gold-2:#f5d76e;
+  --green:#22c55e;
+  --red:#ef4444;
+  --yellow:#f59e0b;
+  --blue:#3b82f6;
+  --shadow:0 10px 30px rgba(0,0,0,.28);
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:linear-gradient(180deg,#06101d 0%, #07111f 100%);color:var(--text);font-family:Arial,sans-serif}
+body{padding:28px}
+button,input,select{font:inherit}
+
+.wrap{max-width:1500px;margin:0 auto}
+.topbar{
+  display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;
+  margin-bottom:22px
+}
+.brand h1{margin:0;font-size:38px;letter-spacing:.3px}
+.brand p{margin:8px 0 0;color:var(--muted)}
+.userbox{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap
+}
+.pill{
+  background:var(--panel);border:1px solid var(--border);border-radius:999px;
+  padding:10px 14px;color:#fff
+}
+.logout-btn,.refresh-btn,.filter-chip,.action-btn,.modal-btn{
+  border:none;border-radius:12px;padding:11px 14px;cursor:pointer;font-weight:700;
+  transition:.18s transform ease,.18s opacity ease,.18s filter ease
+}
+.logout-btn:hover,.refresh-btn:hover,.filter-chip:hover,.action-btn:hover,.modal-btn:hover{transform:translateY(-1px);filter:brightness(1.04)}
+.logout-btn{background:#17263b;color:#fff;border:1px solid rgba(255,255,255,.08)}
+.refresh-btn{background:linear-gradient(135deg,var(--gold),var(--gold-2));color:#07111f}
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:14px;
+  margin:20px 0
+}
+.card{
+  background:linear-gradient(180deg,var(--panel) 0%, #0a1626 100%);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:18px;
+  box-shadow:var(--shadow);
+  cursor:pointer;
+  min-height:120px;
+  position:relative;
+  overflow:hidden;
+}
+.card.active{outline:2px solid rgba(245,215,110,.55)}
+.card .label{color:#d9e3f4;font-size:14px}
+.card .value{font-size:42px;font-weight:800;color:var(--gold-2);margin-top:10px}
+.card .sub{margin-top:8px;color:var(--muted);font-size:13px}
+.card::after{
+  content:"";
+  position:absolute;inset:auto -30px -30px auto;
+  width:120px;height:120px;border-radius:50%;
+  background:radial-gradient(circle, rgba(212,175,55,.18), rgba(212,175,55,0));
+}
+
+.toolbar{
+  display:grid;
+  grid-template-columns:1.2fr 1fr 1fr 1fr auto auto;
+  gap:12px;
+  margin:20px 0 14px
+}
+.input, .select{
+  width:100%;padding:13px 14px;border-radius:14px;
+  border:1px solid rgba(255,255,255,.09);
+  background:var(--panel);color:#fff;outline:none
+}
+.input::placeholder{color:#89a0c2}
+.filter-chip{
+  background:#132136;color:#fff;border:1px solid rgba(255,255,255,.08)
+}
+.filter-chip.active{background:linear-gradient(135deg,var(--gold),var(--gold-2));color:#08111f}
+
+.panel{
+  background:linear-gradient(180deg,var(--panel) 0%, #0a1626 100%);
+  border:1px solid var(--border);
+  border-radius:18px;
+  box-shadow:var(--shadow)
+}
+
+.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse}
+thead th{
+  position:sticky;top:0;background:#0d1b2e;color:var(--gold-2);
+  text-align:left;padding:14px 12px;font-size:14px;border-bottom:1px solid rgba(255,255,255,.08)
+}
+tbody td{
+  padding:14px 12px;border-bottom:1px solid rgba(255,255,255,.06);
+  vertical-align:top;font-size:14px
+}
+tbody tr:hover{background:rgba(255,255,255,.018)}
+.name-cell b{display:block;font-size:15px}
+.muted{color:var(--muted);font-size:12px;line-height:1.4}
+.badge{
+  display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border-radius:999px;
+  font-size:12px;font-weight:800;border:1px solid transparent
+}
+.badge.PENDENTE{background:rgba(245,158,11,.14);color:#ffd27f;border-color:rgba(245,158,11,.22)}
+.badge.APROVADO{background:rgba(34,197,94,.14);color:#95f0b0;border-color:rgba(34,197,94,.22)}
+.badge.REPROVADO{background:rgba(239,68,68,.14);color:#ff9d9d;border-color:rgba(239,68,68,.22)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.action-btn{padding:9px 12px;border-radius:10px}
+.btn-approve{background:rgba(34,197,94,.18);color:#b6ffca;border:1px solid rgba(34,197,94,.25)}
+.btn-reprove{background:rgba(239,68,68,.18);color:#ffc2c2;border:1px solid rgba(239,68,68,.25)}
+.btn-details{background:rgba(59,130,246,.16);color:#c8ddff;border:1px solid rgba(59,130,246,.25)}
+.action-btn[disabled]{opacity:.55;cursor:not-allowed;transform:none}
+
+.meta-row{
+  display:grid;grid-template-columns:1.2fr .9fr .9fr .9fr;gap:14px;margin:18px 0
+}
+.meta-box{
+  background:linear-gradient(180deg,var(--panel) 0%, #0a1626 100%);
+  border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:16px
+}
+.meta-box h3{margin:0 0 10px;font-size:18px}
+.meta-box .mini{color:var(--muted);font-size:13px}
+
+.ranking-list{display:grid;gap:10px}
+.ranking-item{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.06)
+}
+.ranking-left{display:flex;align-items:center;gap:10px}
+.rank-num{
+  width:32px;height:32px;border-radius:50%;
+  display:grid;place-items:center;background:rgba(212,175,55,.16);color:var(--gold-2);font-weight:800
+}
+
+.footer-note{margin-top:14px;color:var(--muted);font-size:13px}
+
+.empty{
+  padding:28px;text-align:center;color:var(--muted)
+}
+
+.modal-backdrop{
+  position:fixed;inset:0;background:rgba(2,6,23,.72);backdrop-filter:blur(4px);
+  display:none;align-items:center;justify-content:center;padding:20px;z-index:50
+}
+.modal-backdrop.show{display:flex}
+.modal{
+  width:min(980px,100%);max-height:90vh;overflow:auto;
+  background:linear-gradient(180deg,#0d1a2b 0%, #091425 100%);
+  border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);padding:22px
+}
+.modal-head{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px
+}
+.modal-head h2{margin:0}
+.close-x{
+  width:42px;height:42px;border-radius:12px;background:#17263b;border:none;color:#fff;cursor:pointer;font-size:18px
+}
+.detail-grid{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px
+}
+.detail{
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:14px
+}
+.detail span{display:block;color:var(--muted);font-size:12px;margin-bottom:6px}
+.detail b, .detail div{word-break:break-word}
+.detail.full{grid-column:1/-1}
+.modal-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.status-line{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px
+}
+
+.loader{opacity:.75}
+.small-btn{
+  padding:8px 10px;border-radius:10px;border:none;cursor:pointer;font-weight:700
+}
+.csv-btn{background:#17263b;color:#fff;border:1px solid rgba(255,255,255,.08)}
+
+@media (max-width:1200px){
+  .toolbar{grid-template-columns:1fr 1fr 1fr}
+  .meta-row{grid-template-columns:1fr 1fr}
+  .detail-grid{grid-template-columns:1fr 1fr}
+}
+@media (max-width:800px){
+  body{padding:16px}
+  .brand h1{font-size:30px}
+  .cards{grid-template-columns:1fr 1fr}
+  .toolbar{grid-template-columns:1fr}
+  .meta-row{grid-template-columns:1fr}
+  .detail-grid{grid-template-columns:1fr}
+  table{min-width:1050px}
+}
+@media (max-width:560px){
+  .cards{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">
+      <h1>Painel G.P.V</h1>
+      <p>Gerencie recrutamentos, acompanhe estatísticas e tome decisões mais rápido.</p>
+    </div>
+    <div class="userbox">
+      <div id="me" class="pill">Carregando usuário...</div>
+      <button class="refresh-btn" id="refreshBtn">Atualizar agora</button>
+      <button class="logout-btn" id="logoutBtn">Sair</button>
+    </div>
+  </div>
+
+  <section class="cards">
+    <div class="card active" data-status="">
+      <div class="label">Total</div>
+      <div class="value" id="total">0</div>
+      <div class="sub">Clique para mostrar tudo</div>
+    </div>
+    <div class="card" data-status="PENDENTE">
+      <div class="label">Pendentes</div>
+      <div class="value" id="pendentes">0</div>
+      <div class="sub">Inscrições aguardando decisão</div>
+    </div>
+    <div class="card" data-status="APROVADO">
+      <div class="label">Aprovados</div>
+      <div class="value" id="aprovados">0</div>
+      <div class="sub">Candidatos aprovados</div>
+    </div>
+    <div class="card" data-status="REPROVADO">
+      <div class="label">Reprovados</div>
+      <div class="value" id="reprovados">0</div>
+      <div class="sub">Candidatos reprovados</div>
+    </div>
+  </section>
+
+  <section class="toolbar">
+    <input class="input" id="searchInput" placeholder="Buscar por nome, Discord ID, WhatsApp, email ou RG">
+    <select class="select" id="statusFilter">
+      <option value="">Todos os status</option>
+      <option value="PENDENTE">Pendentes</option>
+      <option value="APROVADO">Aprovados</option>
+      <option value="REPROVADO">Reprovados</option>
+    </select>
+    <input class="input" id="batalhaoFilter" placeholder="Filtrar por batalhão">
+    <select class="select" id="sortFilter">
+      <option value="recentes">Mais recentes</option>
+      <option value="antigos">Mais antigos</option>
+      <option value="nome">Nome A-Z</option>
+      <option value="status">Status</option>
+    </select>
+    <button class="filter-chip active" id="autoRefreshBtn">Auto refresh: ON</button>
+    <button class="csv-btn small-btn" id="exportBtn">Exportar CSV</button>
+  </section>
+
+  <section class="panel table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Discord</th>
+          <th>Contato</th>
+          <th>Batalhão</th>
+          <th>Plataforma</th>
+          <th>Status</th>
+          <th>Criado em</th>
+          <th>Decidido por</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="lista">
+        <tr><td colspan="9" class="empty">Carregando inscrições...</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="meta-row">
+    <div class="meta-box">
+      <h3>Resumo rápido</h3>
+      <div class="mini" id="resumeText">Carregando...</div>
+    </div>
+    <div class="meta-box">
+      <h3>Hoje</h3>
+      <div class="mini" id="todayText">Carregando...</div>
+    </div>
+    <div class="meta-box">
+      <h3>Tickets</h3>
+      <div class="mini" id="ticketText">Carregando...</div>
+    </div>
+    <div class="meta-box">
+      <h3>Atualização</h3>
+      <div class="mini" id="updateText">Ainda não atualizado.</div>
+    </div>
+  </section>
+
+  <section class="panel" style="padding:18px;margin-top:18px">
+    <h2 style="margin:0 0 14px">Ranking de recrutadores</h2>
+    <div id="ranking" class="ranking-list"></div>
+  </section>
+
+  <div class="footer-note">
+    Atualização automática a cada 10 segundos. Clique nos cards para filtrar rapidamente.
+  </div>
+</div>
+
+<div class="modal-backdrop" id="detailModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>Detalhes da inscrição</h2>
+      <button class="close-x" id="closeModal">✕</button>
+    </div>
+
+    <div class="status-line">
+      <span id="modalStatus"></span>
+      <span class="muted" id="modalCreated"></span>
+      <span class="muted" id="modalDecided"></span>
+    </div>
+
+    <div class="detail-grid" id="detailGrid"></div>
+
+    <div class="modal-actions" id="modalActions"></div>
+  </div>
+</div>
+
+<script>
+const API_BASE = "";
+const state = {
+  me: null,
+  stats: null,
+  ranking: [],
+  items: [],
+  filtered: [],
+  selectedStatus: "",
+  autoRefresh: true,
+  lastUpdated: null,
+  loadingMap: new Set()
+};
+
+const $ = (id) => document.getElementById(id);
+
+async function api(url, options = {}) {
+  const response = await fetch(API_BASE + url, {
+    credentials: "include",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {})
+    }
+  });
+
+  let data = {};
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error("Resposta inválida do servidor.");
+  }
+
+  if (!response.ok) throw new Error(data.error || "Erro");
+  return data;
+}
+
+function escapeHtml(text) {
+  return String(text ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function badge(status) {
+  return `<span class="badge ${status}">${status}</span>`;
+}
+
+function formatDate(value) {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return escapeHtml(value);
+  return date.toLocaleString("pt-BR");
+}
+
+function getSearchText(item) {
+  return [
+    item.nome, item.nick, item.discordId, item.whatsapp, item.email, item.rg,
+    item.batalhao, item.plataforma, item.status
+  ].join(" ").toLowerCase();
+}
+
+function sortItems(items) {
+  const mode = $("sortFilter").value;
+  const arr = [...items];
+
+  if (mode === "antigos") {
+    return arr.sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
+  }
+  if (mode === "nome") {
+    return arr.sort((a,b) => String(a.nome || a.nick || "").localeCompare(String(b.nome || b.nick || ""), "pt-BR"));
+  }
+  if (mode === "status") {
+    return arr.sort((a,b) => String(a.status).localeCompare(String(b.status), "pt-BR"));
+  }
+  return arr.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+}
+
+function applyFilters() {
+  const term = $("searchInput").value.trim().toLowerCase();
+  const status = $("statusFilter").value.trim().toUpperCase();
+  const batalhao = $("batalhaoFilter").value.trim().toLowerCase();
+
+  state.selectedStatus = status;
+
+  let items = state.items.filter(item => {
+    if (status && item.status !== status) return false;
+    if (term && !getSearchText(item).includes(term)) return false;
+    if (batalhao && !String(item.batalhao || "").toLowerCase().includes(batalhao)) return false;
+    return true;
+  });
+
+  state.filtered = sortItems(items);
+  renderTable();
+  renderResumeBoxes();
+  syncCardActive();
+}
+
+function syncCardActive() {
+  document.querySelectorAll(".card").forEach(card => {
+    card.classList.toggle("active", card.dataset.status === state.selectedStatus);
+    if (!state.selectedStatus && card.dataset.status === "") {
+      card.classList.add("active");
+    }
+  });
+}
+
+function renderTable() {
+  const tbody = $("lista");
+
+  if (!state.filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="9" class="empty">Nenhuma inscrição encontrada com os filtros atuais.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = state.filtered.map(item => {
+    const id = item.actionMessageId;
+    const loading = state.loadingMap.has(id);
+    const canAct = item.status === "PENDENTE";
+
+    return `
+      <tr>
+        <td class="name-cell">
+          <b>${escapeHtml(item.nome || item.nick || "Não informado")}</b>
+          <div class="muted">${escapeHtml(item.nick || "")}</div>
+        </td>
+        <td>
+          <div>${escapeHtml(item.discordId || "-")}</div>
+          <div class="muted">${escapeHtml(item.decidedBy || "")}</div>
+        </td>
+        <td>
+          <div>${escapeHtml(item.whatsapp || "-")}</div>
+          <div class="muted">${escapeHtml(item.email || "")}</div>
+        </td>
+        <td>${escapeHtml(item.batalhao || "-")}</td>
+        <td>${escapeHtml(item.plataforma || "-")}</td>
+        <td>${badge(item.status)}</td>
+        <td>
+          <div>${formatDate(item.createdAt)}</div>
+          <div class="muted">${escapeHtml(item.horarioInstrucao || "")}</div>
+        </td>
+        <td>${item.decidedBy ? escapeHtml(item.decidedBy) : '<span class="muted">-</span>'}</td>
+        <td>
+          <div class="actions">
+            <button class="action-btn btn-details" onclick="openDetails('${id}')">Detalhes</button>
+            ${canAct ? `
+              <button class="action-btn btn-approve" ${loading ? "disabled" : ""} onclick="aprovar('${id}')">${loading ? "Processando..." : "Aprovar"}</button>
+              <button class="action-btn btn-reprove" ${loading ? "disabled" : ""} onclick="reprovar('${id}')">${loading ? "Processando..." : "Reprovar"}</button>
+            ` : `<span class="muted">Sem ações</span>`}
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function renderResumeBoxes() {
+  const items = state.filtered.length ? state.filtered : state.items;
+  const total = items.length;
+  const pend = items.filter(x => x.status === "PENDENTE").length;
+  const aprov = items.filter(x => x.status === "APROVADO").length;
+  const repro = items.filter(x => x.status === "REPROVADO").length;
+
+  $("resumeText").innerHTML = `
+    Total visível: <b>${total}</b><br>
+    Pendentes: <b>${pend}</b> • Aprovados: <b>${aprov}</b> • Reprovados: <b>${repro}</b>
+  `;
+
+  const today = new Date().toLocaleDateString("pt-BR");
+  const todayItems = state.items.filter(x => {
+    const dt = new Date(x.createdAt);
+    return !Number.isNaN(dt.getTime()) && dt.toLocaleDateString("pt-BR") === today;
+  });
+  $("todayText").innerHTML = `
+    Inscrições hoje: <b>${todayItems.length}</b><br>
+    Aprovados hoje: <b>${todayItems.filter(x => x.status === "APROVADO").length}</b> •
+    Reprovados hoje: <b>${todayItems.filter(x => x.status === "REPROVADO").length}</b>
+  `;
+
+  $("ticketText").innerHTML = `
+    Tickets criados: <b>${state.items.filter(x => x.ticketChannelId).length}</b><br>
+    Confirmações de vídeo: <b>${state.items.filter(x => x.confirmedAt).length}</b>
+  `;
+
+  $("updateText").innerHTML = state.lastUpdated
+    ? `Última atualização: <b>${state.lastUpdated}</b>`
+    : "Ainda não atualizado.";
+}
+
+function renderRanking() {
+  const box = $("ranking");
+  if (!state.ranking.length) {
+    box.innerHTML = `<div class="empty">Nenhum aprovado ainda.</div>`;
+    return;
+  }
+
+  box.innerHTML = state.ranking.map((item, index) => `
+    <div class="ranking-item">
+      <div class="ranking-left">
+        <div class="rank-num">${index + 1}</div>
+        <div>
+          <div><b>${escapeHtml(item.username)}</b></div>
+          <div class="muted">${escapeHtml(item.userId || "")}</div>
+        </div>
+      </div>
+      <div><b>${item.total}</b> aprovado(s)</div>
+    </div>
+  `).join("");
+}
+
+async function loadMe() {
+  const data = await api("/api/panel/me");
+  state.me = data;
+  $("me").innerHTML = `Logado como <b>${escapeHtml(data.user.global_name || data.user.username)}</b> • Perfil: <b>${escapeHtml(data.role)}</b>`;
+}
+
+async function loadStats() {
+  const d = await api("/api/panel/stats");
+  state.stats = d;
+  $("total").innerText = d.total;
+  $("pendentes").innerText = d.pendentes;
+  $("aprovados").innerText = d.aprovados;
+  $("reprovados").innerText = d.reprovados;
+}
+
+async function loadApplications() {
+  const d = await api("/api/panel/applications");
+  state.items = d.items || [];
+  state.lastUpdated = new Date().toLocaleTimeString("pt-BR");
+  applyFilters();
+}
+
+async function loadRanking() {
+  const d = await api("/api/panel/ranking");
+  state.ranking = d.ranking || [];
+  renderRanking();
+}
+
+async function refreshAll() {
+  try {
+    $("refreshBtn").textContent = "Atualizando...";
+    $("refreshBtn").disabled = true;
+    await Promise.all([loadMe(), loadStats(), loadApplications(), loadRanking()]);
+  } catch (e) {
+    alert(e.message || "Erro ao carregar painel.");
+  } finally {
+    $("refreshBtn").textContent = "Atualizar agora";
+    $("refreshBtn").disabled = false;
+  }
+}
+
+async function aprovar(id) {
+  try {
+    state.loadingMap.add(id);
+    renderTable();
+    await api("/api/panel/approve/" + id, {
+      method: "POST",
+      body: JSON.stringify({})
+    });
+    await Promise.all([loadStats(), loadApplications(), loadRanking()]);
+  } catch (e) {
+    alert(e.message || "Erro ao aprovar.");
+  } finally {
+    state.loadingMap.delete(id);
+    renderTable();
+  }
+}
+
+async function reprovar(id) {
+  const motivo = prompt("Motivo da reprovação:");
+  if (!motivo) return;
+
+  try {
+    state.loadingMap.add(id);
+    renderTable();
+    await api("/api/panel/reprove/" + id, {
+      method: "POST",
+      body: JSON.stringify({ motivo })
+    });
+    await Promise.all([loadStats(), loadApplications(), loadRanking()]);
+  } catch (e) {
+    alert(e.message || "Erro ao reprovar.");
+  } finally {
+    state.loadingMap.delete(id);
+    renderTable();
+  }
+}
+
+function openDetails(id) {
+  const item = state.items.find(x => x.actionMessageId === id);
+  if (!item) return;
+
+  $("modalStatus").innerHTML = badge(item.status);
+  $("modalCreated").textContent = `Criado em: ${formatDate(item.createdAt)}`;
+  $("modalDecided").textContent = item.decidedAt ? `Decidido em: ${formatDate(item.decidedAt)}` : "";
+
+  const details = [
+    ["Nome", item.nome || item.nick || "-"],
+    ["Nick", item.nick || "-"],
+    ["Discord ID", item.discordId || "-"],
+    ["WhatsApp", item.whatsapp || "-"],
+    ["Email", item.email || "-"],
+    ["RG", item.rg || "-"],
+    ["Nascimento", item.nascimento || "-"],
+    ["Plataforma", item.plataforma || "-"],
+    ["Batalhão", item.batalhao || "-"],
+    ["VIP", item.vip || "-"],
+    ["Horário de instrução", item.horarioInstrucao || "-"],
+    ["Ticket", item.ticketChannelId || "-"],
+    ["Confirmou vídeos", item.confirmedAt ? formatDate(item.confirmedAt) : "Não"],
+    ["Ticket criado em", item.ticketCreatedAt ? formatDate(item.ticketCreatedAt) : "-"],
+    ["Ticket fechado em", item.ticketClosedAt ? formatDate(item.ticketClosedAt) : "-"],
+    ["Motivo", item.motivo || "-"]
+  ];
+
+  $("detailGrid").innerHTML = details.map(([label, value]) => `
+    <div class="detail ${label === "Motivo" ? "full" : ""}">
+      <span>${escapeHtml(label)}</span>
+      <div>${escapeHtml(value)}</div>
+    </div>
+  `).join("");
+
+  const modalActions = [];
+  if (item.status === "PENDENTE") {
+    modalActions.push(`<button class="modal-btn btn-approve" onclick="aprovar('${id}'); closeDetails();">Aprovar</button>`);
+    modalActions.push(`<button class="modal-btn btn-reprove" onclick="reprovar('${id}'); closeDetails();">Reprovar</button>`);
+  }
+  $("modalActions").innerHTML = modalActions.join("") || `<span class="muted">Essa inscrição não possui ações disponíveis.</span>`;
+
+  $("detailModal").classList.add("show");
+}
+
+function closeDetails() {
+  $("detailModal").classList.remove("show");
+}
+
+async function logout() {
+  try {
+    await fetch(API_BASE + "/auth/logout", {
+      method: "POST",
+      credentials: "include"
+    });
+  } catch {}
+  window.location.href = "/";
+}
+
+function exportCsv() {
+  const rows = [
+    ["Nome","Nick","Discord ID","WhatsApp","Email","Batalhão","Plataforma","Status","Criado em","Decidido em","Motivo"]
+  ];
+
+  state.filtered.forEach(item => {
+    rows.push([
+      item.nome || "",
+      item.nick || "",
+      item.discordId || "",
+      item.whatsapp || "",
+      item.email || "",
+      item.batalhao || "",
+      item.plataforma || "",
+      item.status || "",
+      item.createdAt || "",
+      item.decidedAt || "",
+      item.motivo || ""
+    ]);
+  });
+
+  const csv = rows.map(row => row.map(value => {
+    const safe = String(value ?? "").replaceAll('"', '""');
+    return `"${safe}"`;
+  }).join(";")).join("\n");
+
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "painel-gpv.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+document.querySelectorAll(".card").forEach(card => {
+  card.addEventListener("click", () => {
+    $("statusFilter").value = card.dataset.status;
+    state.selectedStatus = card.dataset.status;
+    applyFilters();
+  });
+});
+
+$("statusFilter").addEventListener("change", applyFilters);
+$("searchInput").addEventListener("input", applyFilters);
+$("batalhaoFilter").addEventListener("input", applyFilters);
+$("sortFilter").addEventListener("change", applyFilters);
+$("refreshBtn").addEventListener("click", refreshAll);
+$("logoutBtn").addEventListener("click", logout);
+$("closeModal").addEventListener("click", closeDetails);
+$("detailModal").addEventListener("click", (e) => {
+  if (e.target.id === "detailModal") closeDetails();
+});
+$("exportBtn").addEventListener("click", exportCsv);
+$("autoRefreshBtn").addEventListener("click", () => {
+  state.autoRefresh = !state.autoRefresh;
+  $("autoRefreshBtn").textContent = "Auto refresh: " + (state.autoRefresh ? "ON" : "OFF");
+  $("autoRefreshBtn").classList.toggle("active", state.autoRefresh);
+});
+
+setInterval(() => {
+  if (state.autoRefresh) {
+    loadApplications().catch(() => {});
+    loadStats().catch(() => {});
+    loadRanking().catch(() => {});
+  }
+}, 10000);
+
+refreshAll();
+</script>
+</body>
+</html>
+

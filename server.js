@@ -27,16 +27,14 @@ import {
  * - Espera o bot ficar READY antes de usar client.channels/guilds
  */
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 const app = express();
 app.use(express.json());
 app.use((req, res, next) => {
   const allowedOrigins = [
+    process.env.BASE_URL || "",
     process.env.SITE_URL || "",
-    process.env.ADMIN_URL || "",
-    "https://recrutamento-gpv.vercel.app",
-    "https://recrutamento-gpv.vercel.app/admin.html",
-    "https://recrutamento-gpv-clebinjr2003s-projects.vercel.app"
+    process.env.ADMIN_URL || ""
   ].filter(Boolean);
 
   const origin = req.headers.origin;
@@ -56,6 +54,7 @@ app.use((req, res, next) => {
 
   next();
 });
+
 
 app.set("trust proxy", 1);
 
@@ -425,15 +424,19 @@ async function startBotIfNeeded() {
 }
 
 // ================== SESSÃO / STATIC ==================
+app.set("trust proxy", 1);
+
 app.use(
   session({
-    secret: SESSION_SECRET || "dev_secret_change_me", // defina SESSION_SECRET no Render
+    secret: SESSION_SECRET || "dev_secret_change_me",
     resave: false,
     saveUninitialized: false,
+    proxy: true,
     cookie: {
       httpOnly: true,
-      sameSite: "none",
-      secure: true
+      sameSite: "lax",
+      secure: true,
+      maxAge: 1000 * 60 * 60 * 24
     }
   })
 );
@@ -988,12 +991,12 @@ app.get("/auth/discord", (req, res) => {
     return res.status(500).send("OAuth não configurado. Falta DISCORD_CLIENT_ID ou DISCORD_REDIRECT_URI.");
   }
 
-  //  anti-spam: impede iniciar OAuth em sequência
   const now = Date.now();
   const last = req.session.lastOauthStartAt || 0;
   if (now - last < 2500) {
     return res.redirect(`/error/rate_limit?sec=3`);
   }
+
   req.session.lastOauthStartAt = now;
 
   const state = Math.random().toString(36).slice(2);
@@ -1007,8 +1010,16 @@ app.get("/auth/discord", (req, res) => {
     state
   });
 
-  res.redirect(`https://discord.com/api/oauth2/authorize?${params.toString()}`);
+  req.session.save((err) => {
+    if (err) {
+      console.error("Erro ao salvar sessão OAuth:", err);
+      return res.status(500).send("Erro ao iniciar login do Discord.");
+    }
+
+    res.redirect(`https://discord.com/api/oauth2/authorize?${params.toString()}`);
+  });
 });
+
 
 // ================== OAUTH CALLBACK ==================
 app.get("/auth/discord/callback", async (req, res) => {
@@ -1089,7 +1100,8 @@ app.get("/auth/discord/callback", async (req, res) => {
     req.session.inGuild = true;
 
     delete req.session.oauthState;
-    return res.redirect(process.env.ADMIN_URL || process.env.SITE_URL || "/");
+    console.log("REDIRECT FINAL =", process.env.SITE_URL);
+    return res.redirect(process.env.SITE_URL);
   } catch (e) {
     console.error(e);
     return res.status(500).send("Erro interno no login do Discord.");
@@ -1824,10 +1836,8 @@ app.use((err, req, res, next) => {
 });
 
 // ================== START (SITE SEMPRE) ==================
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log("Servidor rodando na porta", PORT);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log("Servidor rodando na porta " + PORT);
 });
 
 // ❗️não damos client.login aqui (sob demanda)

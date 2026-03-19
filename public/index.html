@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Recrutamento da G.P.V</title>
+
+  <style>
+    body{
+      font-family:Arial,sans-serif;
+      background:radial-gradient(circle at top,#0b1220,#000814);
+      color:#e5e7eb;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      min-height:100vh;
+      margin:0;
+      padding:16px
+    }
+    .container{
+      background:linear-gradient(180deg,#0b1220,#020617);
+      padding:24px;
+      border-radius:14px;
+      width:100%;
+      max-width:560px;
+      box-shadow:0 0 30px rgba(0,0,0,.7);
+      border:1px solid rgba(212,175,55,.35)
+    }
+    .logo{
+      display:flex;
+      justify-content:center;
+      margin-bottom:10px
+    }
+    .logo img{
+      width:110px;height:110px;object-fit:cover;border-radius:50%;
+      box-shadow:0 0 12px rgba(212,175,55,.6);
+      border:1px solid rgba(212,175,55,.35)
+    }
+    h1{
+      text-align:center;
+      color:#d4af37;
+      margin:8px 0 18px;
+      letter-spacing:.6px
+    }
+    label{
+      display:block;
+      margin-top:10px;
+      font-weight:bold;
+      color:#cbd5f5
+    }
+    input,select,textarea{
+      width:100%;
+      padding:10px;
+      margin-top:6px;
+      border-radius:8px;
+      border:1px solid rgba(212,175,55,.35);
+      background:#020617;
+      color:#fff;
+      outline:none
+    }
+    textarea{min-height:84px; resize:vertical}
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:8px;
+      margin-top:6px
+    }
+    .item{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      background:#020617;
+      padding:8px;
+      border-radius:8px;
+      border:1px solid rgba(212,175,55,.35);
+      font-size:13px;
+      cursor:pointer;
+      transition:.15s ease
+    }
+    .item:hover{
+      border-color:#f5d76e;
+      box-shadow:0 0 0 1px rgba(212,175,55,.25)
+    }
+    .item input{accent-color:#d4af37}
+
+    .terms{
+      margin-top:14px;
+      padding:12px;
+      border-radius:10px;
+      background:#020617;
+      border:1px dashed rgba(212,175,55,.35);
+      color:#cbd5f5;
+      font-size:13px;
+      line-height:1.4
+    }
+    .terms label{
+      margin-top:0;
+      font-weight:600;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      cursor:pointer
+    }
+    .terms input{margin-top:2px; accent-color:#d4af37}
+
+    button{
+      width:100%;
+      margin-top:18px;
+      padding:12px;
+      border:none;
+      border-radius:10px;
+      background:linear-gradient(135deg,#d4af37,#f5d76e);
+      color:#020617;
+      font-size:16px;
+      font-weight:bold;
+      cursor:pointer;
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px
+    }
+    button:disabled{
+      opacity:.75;
+      cursor:not-allowed
+    }
+
+    .btnSecondary{
+      margin-top:10px;
+      background:#0b1220;
+      border:1px solid rgba(212,175,55,.35);
+      color:#e5e7eb;
+    }
+
+    .authBox{
+      margin:10px 0 6px;
+      padding:12px;
+      border-radius:10px;
+      background:#020617;
+      border:1px solid rgba(212,175,55,.35);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .authLeft{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      font-size:13px;
+      color:#cbd5f5;
+    }
+    .authLeft strong{color:#f5d76e}
+    .authBtns{
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+    .authBtns button{
+      width:auto;
+      margin-top:0;
+      padding:10px 12px;
+      border-radius:10px;
+      font-size:14px;
+      font-weight:700;
+    }
+
+    /* ALERTA BONITO */
+    .notice{
+      margin:10px 0 12px;
+      padding:12px;
+      border-radius:12px;
+      background:#020617;
+      border:1px solid rgba(212,175,55,.35);
+      color:#cbd5f5;
+      font-size:13px;
+      line-height:1.35;
+      display:none;
+    }
+    .notice.show{display:block}
+    .noticeTitle{
+      font-weight:800;
+      color:#f5d76e;
+      margin-bottom:6px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .noticeBtns{
+      margin-top:10px;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .noticeBtns a{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      text-decoration:none;
+      padding:10px 12px;
+      border-radius:10px;
+      font-weight:800;
+      font-size:14px;
+      border:1px solid rgba(212,175,55,.35);
+      background:#0b1220;
+      color:#e5e7eb;
+    }
+    .noticeBtns a.primary{
+      background:linear-gradient(135deg,#5865F2,#8ea1ff);
+      border:none;
+      color:#fff;
+    }
+
+    /* LOADER DO BOTÃO */
+    .spinner{
+      width:18px;height:18px;
+      border-radius:50%;
+      border:3px solid rgba(0,0,0,.25);
+      border-top-color:#020617;
+      animation:spin .8s linear infinite;
+      display:none;
+    }
+    @keyframes spin{ to{ transform:rotate(360deg)} }
+
+    .msg{margin-top:10px;text-align:center}
+    .err{color:#ef4444}
+    .ok{color:#22c55e}
+
+    /*BLOCO DA IMAGEM COM LINK */
+    .linkCard{
+      margin-top:12px;
+      border-radius:14px;
+      overflow:hidden;
+      border:1px solid rgba(212,175,55,.35);
+      background:#020617;
+      transition:.15s ease;
+    }
+    .linkCard:hover{
+      border-color:#f5d76e;
+      box-shadow:0 0 0 1px rgba(212,175,55,.25);
+      transform:translateY(-1px);
+    }
+    .linkCard a{
+      display:block;
+      text-decoration:none;
+      color:inherit;
+    }
+    .linkCard img{
+      width:100%;
+      display:block;
+      max-height:220px;
+      object-fit:cover;
+    }
+    .linkCard .caption{
+      padding:10px 12px;
+      font-size:13px;
+      color:#cbd5f5;
+      line-height:1.35;
+    }
+    .linkCard .caption strong{
+      color:#f5d76e;
+    }
+
+    /* MODAL SUCESSO */
+    .modal{
+      position:fixed; inset:0;
+      background:rgba(0,0,0,.6);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:9999
+    }
+    .modal.show{display:flex}
+
+    .modal-box{
+      background:#020617;
+      padding:26px;
+      width:92%;
+      max-width:420px;
+      border-radius:15px;
+      text-align:center;
+      border:1px solid rgba(212,175,55,.4);
+      box-shadow:0 0 25px rgba(0,0,0,.8)
+    }
+    .check-circle{
+      width:84px;height:84px;border-radius:50%;
+      background:linear-gradient(135deg,#22c55e,#16a34a);
+      display:flex;align-items:center;justify-content:center;
+      margin:0 auto 14px;
+      animation:pop .25s ease-out
+    }
+    @keyframes pop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+
+    .check{
+      width:34px;height:18px;
+      border-left:6px solid #fff;
+      border-bottom:6px solid #fff;
+      transform:rotate(-45deg);
+      margin-top:-4px;
+      animation:draw .25s ease-out .05s both
+    }
+    @keyframes draw{
+      from{opacity:0;transform:rotate(-45deg) scale(.7)}
+      to{opacity:1;transform:rotate(-45deg) scale(1)}
+    }
+
+    .progress-wrap{
+      margin:14px 0 2px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(212,175,55,.25);
+      border-radius:999px;
+      overflow:hidden;
+      height:10px
+    }
+    .progress-bar{
+      height:100%;
+      width:0%;
+      background:linear-gradient(135deg,#d4af37,#f5d76e);
+      transition:width .15s linear
+    }
+
+    #closeModal{
+      margin-top:14px;
+      width:100%;
+      padding:11px 14px;
+      border:none;
+      border-radius:10px;
+      background:linear-gradient(135deg,#d4af37,#f5d76e);
+      font-weight:bold;
+      cursor:pointer
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container" id="box">
+    <div class="logo">
+      <img src="logo-gpv.png" alt="Logo G.P.V">
+    </div>
+
+    <h1>Recrutamento da G.P.V</h1>
+
+    <!--  Avisos  -->
+    <div class="notice" id="noticeBox">
+      <div class="noticeTitle" id="noticeTitle">⚠️ Atenção</div>
+      <div id="noticeText"></div>
+      <div class="noticeBtns" id="noticeBtns"></div>
+    </div>
+
+    <!-- BLOCO DE LOGIN DISCORD -->
+    <div class="authBox" id="authBox">
+      <div class="authLeft">
+        <div>Status: <strong id="authStatus">Verificando...</strong></div>
+        <div id="authUserLine" style="opacity:.95"></div>
+      </div>
+
+      <div class="authBtns">
+        <button id="btnLoginDiscord" type="button">Entrar com Discord</button>
+        <button id="btnLogoutDiscord" type="button" class="btnSecondary" style="display:none">Sair</button>
+      </div>
+    </div>
+
+    <!-- STATUS DA INSCRIÇÃO -->
+    <div class="notice" id="statusBox">
+      <div class="noticeTitle">📋 Status da sua inscrição</div>
+      <div id="statusText">Verificando...</div>
+    </div>
+
+    <form id="form">
+      <label>Nick</label>
+      <input id="nick" required>
+
+      <label>WhatsApp</label>
+      <input id="whatsapp" required>
+
+      <label>PC/Android</label>
+      <select id="plataforma" required>
+        <option value="">Selecione</option>
+        <option value="PC">PC</option>
+        <option value="Android">Android</option>
+      </select>
+
+      <label>Para qual batalhão você quer ser recrutado?</label>
+      <select id="batalhao" required>
+        <option value="">Selecione</option>
+        <option value="ROTA">ROTA</option>
+        <option value="EB">EB</option>
+      </select>
+
+      <label>Sócio/VIP</label>
+      <select id="vip" required>
+        <option value="">Selecione</option>
+        <option value="Sim">Sim</option>
+        <option value="Não">Não</option>
+      </select>
+
+      <label>RG</label>
+      <input id="rg" required>
+
+      <label>Nascimento</label>
+      <input type="date" id="nascimento" required>
+
+      <label>Idade</label>
+      <input type="number" id="idade" min="10" required>
+
+      <label>Email</label>
+      <input type="email" id="email" required>
+
+      <label>Qual o seu nível?</label>
+      <input type="number" id="nivel" min="1" required>
+
+      <label>Qual a sua reputação no jogo?</label>
+      <input id="reputacao" placeholder="Ex: 100% / 50% / 30%" required>
+
+      <label>Você tem porte de armas?</label>
+      <select id="porteArmas" required>
+        <option value="">Selecione</option>
+        <option value="Sim">Sim</option>
+        <option value="Não">Não</option>
+      </select>
+
+      <label>Seu Email e Seu discord estão cadastrado na cidade?</label>
+      <select id="cidadeCadastrado" required>
+        <option value="">Selecione</option>
+        <option value="Sim">Sim</option>
+        <option value="Não">Não</option>
+      </select>
+
+      <label>Horarios De Recutamento (clique na imagem)</label>
+      <div class="linkCard">
+        <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vRGroDQWVxHJvVct4EBggqYVN0pcjwE4xTMYOXEJDXUbSTgUPU9bC_PwyOt0ILZ7NXrvqB1g03cyID8/pubhtml?gid=1986607081&single=true" target="_blank" rel="noopener">
+          <img
+            src="https://i.postimg.cc/GtG2k1pv/ROTA-EB-BANNER.png"
+            alt="Clique para abrir as instruções"
+          />
+          <div class="caption">
+            <strong>📌 Clique aqui</strong> para abrir e ver os horários em que o recrutador estará disponível para recrutamento.
+          </div>
+        </a>
+      </div>
+
+      <label>Como conheceu a corporação</label>
+      <textarea id="comoConheceu" required></textarea>
+
+      <label>Por que quer entrar na G.P.V</label>
+      <textarea id="porqueQuer" required></textarea>
+
+      <div class="terms">
+        <label>
+          <input type="checkbox" id="aceitoTermos" required>
+          <span>
+            Eu li e estou ciente de que, ao ingressar na <b>G.P.V</b>, estarei disposto a cumprir as seguintes regras:
+            <br><br>
+            <b>1.</b> É proibido sair do batalhão estando fardado.<br>
+            <b>2.</b> Não é permitido realizar patrulhamento em conjunto com outras corporações.<br>
+            <b>3.</b> Durante a folga, é autorizado portar apenas a Desert Eagle, sendo proibido o uso de armas de grosso calibre.<br>
+            <b>4.</b> Antes de entrar na cidade, é obrigatório estar conectado ao Discord da G.P.V.<br>
+            <b>5.</b> Ao ingressar nos grupos oficiais da G.P.V., o membro deverá se apresentar de forma adequada e respeitosa.<br>
+            <b>6.</b> É proibido utilizar VTRs para as quais não possua o curso ou habilitação necessária, exceto em casos de emergência ou urgência devidamente justificados.<br>
+            <b>7.</b> Todas as ocorrências devem ser gravadas obrigatoriamente.<br>
+            <b>8.</b> Ao iniciar o patrulhamento, é obrigatório ativar a TAG da ROTA.<br>
+            <b>9.</b> Ao entrar de folga, a TAG da ROTA deverá ser removida.<br>
+            <b>10.</b> O Soldado 2ª Classe não possui direito à folga.<br>
+            <b>11.</b> Ao ingressar em uma call, verifique se há um superior presente e apresente-se adequadamente.<br>
+            <b>12.</b> Ao entrar no Discord, confirme se há membros na base ou em patrulhamento antes de iniciar suas atividades.<br>
+            <b>13.</b> Para configurar corretamente a TAG, utilize o comando <b>/missaofml 836</b> e, em seguida, <b>/config</b>, ativando a primeira opção onde consta “Tag Vip/Family”.<br>
+            <b>14.</b> O membro da ROTA poderá possuir, no máximo, 10 estrelas de procurado. Caso seja flagrado com quantidade superior, estará sujeito à advertência disciplinar.<br>
+          </span>
+        </label>
+      </div>
+
+      <button id="btnEnviar" type="submit" disabled>
+        <span class="spinner" id="spinner"></span>
+        <span id="btnText">Enviar (faça login no Discord)</span>
+      </button>
+
+      <div class="msg" id="msg"></div>
+    </form>
+  </div>
+
+  <!-- MODAL DE SUCESSO -->
+  <div id="successModal" class="modal" aria-hidden="true">
+    <div class="modal-box">
+      <div class="check-circle"><div class="check"></div></div>
+      <h2 style="margin:0;color:#22c55e">Enviado com sucesso!</h2>
+      <p style="margin:10px 0 0;color:#cbd5f5">Seu formulário foi enviado. Aguarde contato no Discord.</p>
+
+      <div class="progress-wrap">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+
+      <button id="closeModal">OK</button>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = "";
+    // 🔥 TROQUE AQUI PELO LINK DO SEU SERVIDOR
+    const DISCORD_INVITE_URL = "https://discord.gg/yu6BEzNR2X";
+
+    const form = document.getElementById("form");
+    const msg = document.getElementById("msg");
+
+    const modal = document.getElementById("successModal");
+    const closeModal = document.getElementById("closeModal");
+    const progressBar = document.getElementById("progressBar");
+
+    const btnEnviar = document.getElementById("btnEnviar");
+    const spinner = document.getElementById("spinner");
+    const btnText = document.getElementById("btnText");
+
+    //  Login UI
+    const authStatus = document.getElementById("authStatus");
+    const authUserLine = document.getElementById("authUserLine");
+    const btnLoginDiscord = document.getElementById("btnLoginDiscord");
+    const btnLogoutDiscord = document.getElementById("btnLogoutDiscord");
+
+    //  Avisos UI
+    const noticeBox = document.getElementById("noticeBox");
+    const noticeTitle = document.getElementById("noticeTitle");
+    const noticeText = document.getElementById("noticeText");
+    const noticeBtns = document.getElementById("noticeBtns");
+
+    function showNotice({ title, text, buttons = [] }) {
+      noticeTitle.textContent = title || "⚠️ Atenção";
+      noticeText.innerHTML = text || "";
+      noticeBtns.innerHTML = "";
+
+      for (const b of buttons) {
+        const a = document.createElement("a");
+        a.href = b.href;
+        a.target = b.target || "_blank";
+        a.rel = "noopener";
+        a.textContent = b.label;
+        a.className = b.primary ? "primary" : "";
+        noticeBtns.appendChild(a);
+      }
+
+      noticeBox.classList.add("show");
+    }
+
+    function clearNotice() {
+      noticeBox.classList.remove("show");
+      noticeTitle.textContent = "⚠️ Atenção";
+      noticeText.innerHTML = "";
+      noticeBtns.innerHTML = "";
+    }
+
+    //  Detecta navegador embutido (Instagram/Discord/TikTok/Facebook etc.)
+    function isInAppBrowser() {
+      const ua = (navigator.userAgent || "").toLowerCase();
+      return /instagram|fbav|fban|line|tiktok|snapchat|discord|twitter|wv|; wv\)/.test(ua);
+    }
+
+    //  Mostra aviso baseado no querystring ?error=
+    (function handleErrorsFromUrl(){
+      const p = new URLSearchParams(location.search);
+      const err = p.get("error");
+
+      if (err === "voce_precisa_entrar_no_servidor") {
+        showNotice({
+          title: "🚨 Você precisa entrar no servidor da G.P.V",
+          text:
+            "Para conectar e enviar o formulário, primeiro entre no servidor do Discord da <b>G.P.V</b>.<br>" +
+            "Depois volte aqui e clique em <b>Entrar com Discord</b>.",
+          buttons: [
+            { label: "Entrar no servidor da G.P.V", href: DISCORD_INVITE_URL, primary: true },
+            { label: "Tentar conectar novamente", href: "/", primary: false, target: "_self" }
+          ]
+        });
+      }
+
+      // aviso de navegador embutido
+      if (isInAppBrowser()) {
+        showNotice({
+          title: "⚠️ Abra no Chrome/Safari",
+          text:
+            "Você está usando um navegador embutido (Instagram/Discord etc.).<br>" +
+            "Isso pode dar problema no login do Discord.<br><br>" +
+            "✅ Abra este link no <b>Chrome</b> (Android/PC) ou <b>Safari</b> (iPhone) e tente novamente.",
+          buttons: [
+            { label: "Entrar no servidor da G.P.V", href: DISCORD_INVITE_URL, primary: false }
+          ]
+        });
+      }
+    })();
+
+    //  Instrutores por horário (WhatsApp) 
+    const INSTRUTORES = {
+      manha: "5511988647741",
+      tarde: "5511988647741",
+      noite: "5511988647741"
+    };
+
+    let sessionUser = null;
+
+    function setLoading(isLoading){
+      spinner.style.display = isLoading ? "inline-block" : "none";
+
+      if (isLoading) {
+        btnEnviar.disabled = true;
+        btnText.textContent = "Enviando...";
+      } else {
+        btnEnviar.disabled = !sessionUser;
+        btnText.textContent = sessionUser ? "Enviar" : "Enviar (faça login no Discord)";
+      }
+    }
+
+    function showModal(){
+      modal.classList.add("show");
+      modal.setAttribute("aria-hidden","false");
+
+      progressBar.style.width = "0%";
+      let p = 0;
+      const t = setInterval(()=>{
+        p += Math.floor(Math.random()*18)+8;
+        if(p >= 100){
+          p = 100;
+          clearInterval(t);
+        }
+        progressBar.style.width = p + "%";
+      }, 120);
+    }
+
+    function hideModal(){
+      modal.classList.remove("show");
+      modal.setAttribute("aria-hidden","true");
+    }
+
+    closeModal.addEventListener("click", hideModal);
+    modal.addEventListener("click", (e)=>{ if(e.target === modal) hideModal(); });
+
+    // sempre ler resposta como texto e só parsear JSON quando for JSON
+    async function readJsonOrThrow(res) {
+      const ct = (res.headers.get("content-type") || "").toLowerCase();
+      const text = await res.text();
+
+      if (!ct.includes("application/json")) {
+        throw new Error(`Resposta não é JSON (status ${res.status}). Início: ${text.slice(0, 120)}`);
+      }
+
+      try {
+        return JSON.parse(text);
+      } catch {
+        throw new Error(`JSON inválido (status ${res.status}). Início: ${text.slice(0, 120)}`);
+      }
+    }
+
+    function buildWhatsAppMessage(payload) {
+      const discordTxt = sessionUser
+        ? `@${sessionUser.username} (${sessionUser.id})`
+        : "Não informado";
+
+      return (
+`📌 *Novo formulário - Recrutamento G.P.V*
+
+👤 *Nick:* ${payload.nick}
+🆔 *Discord:* ${discordTxt}
+📱 *WhatsApp:* ${payload.whatsapp}
+💻 *Plataforma:* ${payload.plataforma}
+🏛 *Batalhão:* ${payload.batalhao}
+💎 *Sócio/VIP:* ${payload.vip}
+🪪 *RG:* ${payload.rg}
+🎂 *Nascimento:* ${payload.nascimento}
+🔢 *Idade:* ${payload.idade}
+✉️ *Email:* ${payload.email}
+🏛 *Email e Discord cadastrado:* ${payload.cidadeCadastrado}//
+
+🎮 *Nível:* ${payload.nivel}//
+⭐ *Reputação:* ${payload.reputacao}//
+🔫 *Porte de armas:* ${payload.porteArmas}//
+
+📝 *Como conheceu:* ${payload.comoConheceu}
+📝 *Por que quer entrar:* ${payload.porqueQuer}
+
+✅ *Aceitou termos:* ${payload.aceitouTermos ? "Sim" : "Não"}`
+      );
+    }
+
+    function openWhatsAppToInstructor(payload) {
+      const numeroInstrutor = INSTRUTORES.manha;
+
+      if (!numeroInstrutor) {
+        console.warn("Nenhum instrutor configurado.");
+        return;
+      }
+
+      const text = buildWhatsAppMessage(payload);
+      const url = `https://wa.me/${numeroInstrutor}?text=${encodeURIComponent(text)}`;
+      window.open(url, "_blank");
+    }
+
+    function setAuthUi(logged, user){
+      sessionUser = logged ? user : null;
+
+      if (logged) {
+        checkApplicationStatus();
+        authStatus.textContent = "Conectado";
+        authUserLine.textContent = `Logado como: ${user.global_name ? user.global_name + " " : ""}@${user.username} (ID: ${user.id})`;
+        btnLoginDiscord.style.display = "none";
+        btnLogoutDiscord.style.display = "inline-flex";
+
+        const p = new URLSearchParams(location.search);
+        if (p.get("error") === "voce_precisa_entrar_no_servidor") {
+          // se quiser limpar o aviso:
+          // clearNotice();
+        }
+      } else {
+        authStatus.textContent = "Desconectado";
+        authUserLine.textContent = "Você precisa entrar com Discord para enviar o formulário.";
+        btnLoginDiscord.style.display = "inline-flex";
+        btnLogoutDiscord.style.display = "none";
+      }
+
+      btnEnviar.disabled = !logged;
+      btnText.textContent = logged ? "Enviar" : "Enviar (faça login no Discord)";
+    }
+
+    async function checkSession(){
+      try {
+        authStatus.textContent = "Verificando...";
+
+        const r = await fetch(API_BASE + "/api/me", { method: "GET", credentials: "include" });
+        const out = await readJsonOrThrow(r);
+
+        if (out?.logged) setAuthUi(true, out.user);
+        else setAuthUi(false, null);
+      } catch (e) {
+        console.log("checkSession erro:", e);
+        setAuthUi(false, null);
+        authStatus.textContent = "Erro";
+      }
+    }
+
+    btnLoginDiscord.addEventListener("click", () => {
+      window.location.href = API_BASE + "/auth/discord";
+    });
+
+    btnLogoutDiscord.addEventListener("click", async () => {
+      try {
+        await fetch(API_BASE + "/auth/logout", { method: "POST", credentials: "include" });
+      } catch {}
+      await checkSession();
+    });
+
+    checkSession();
+
+    
+    async function checkApplicationStatus() {
+      try {
+        const r = await fetch(API_BASE + "/api/status", { credentials: "include" });
+        const data = await r.json();
+
+        if (!data || !data.status) return;
+
+        const box = document.getElementById("statusBox");
+        const txt = document.getElementById("statusText");
+
+        box.classList.add("show");
+
+        if (data.status === "PENDENTE") {
+          txt.innerHTML = "⏳ Sua inscrição está <b>EM ANÁLISE</b>. Aguarde um instrutor.";
+        }
+
+        if (data.status === "APROVADO") {
+          txt.innerHTML = "✅ Você foi <b>APROVADO</b>. Verifique seu Discord.";
+        }
+
+        if (data.status === "REPROVADO") {
+          txt.innerHTML = "❌ Sua inscrição foi <b>REPROVADA</b>.<br>Motivo: " + (data.motivo || "Não informado");
+        }
+      } catch (e) {
+        console.log("Erro ao buscar status:", e);
+      }
+    }
+
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      msg.textContent = "";
+      msg.className = "msg";
+
+      if (!sessionUser) {
+        msg.textContent = "❌ Você precisa entrar com Discord para enviar o formulário.";
+        msg.classList.add("err");
+        return;
+      }
+
+      const payload = {
+        nick: document.getElementById("nick").value.trim(),
+        nome: document.getElementById("nick").value.trim(),
+
+        whatsapp: document.getElementById("whatsapp").value.trim(),
+        plataforma: document.getElementById("plataforma").value,
+        batalhao: document.getElementById("batalhao").value,
+        vip: document.getElementById("vip").value,
+        rg: document.getElementById("rg").value.trim(),
+        nascimento: document.getElementById("nascimento").value,
+        idade: document.getElementById("idade").value,
+        email: document.getElementById("email").value.trim(),
+        cidadeCadastrado: document.getElementById("cidadeCadastrado").value,
+
+        nivel: document.getElementById("nivel").value,
+        reputacao: document.getElementById("reputacao").value.trim(),
+        porteArmas: document.getElementById("porteArmas").value,
+
+        comoConheceu: document.getElementById("comoConheceu").value.trim(),
+        porqueQuer: document.getElementById("porqueQuer").value.trim(),
+
+        aceitouTermos: document.getElementById("aceitoTermos").checked
+      };
+
+      if (!payload.aceitouTermos) {
+        msg.textContent = "❌ Você precisa aceitar os termos.";
+        msg.classList.add("err");
+        return;
+      }
+
+      try {
+        setLoading(true);
+
+        const r = await fetch(API_BASE + "/api/recrutar", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const out = await readJsonOrThrow(r);
+        if (!r.ok) throw new Error(out.error || "Erro ao enviar.");
+
+        showModal();
+        openWhatsAppToInstructor(payload);
+        form.reset();
+      } catch (err) {
+        msg.textContent = "❌ " + (err.message || "Erro ao enviar.");
+        msg.classList.add("err");
+      } finally {
+        setLoading(false);
+      }
+    });
+  </script>
+</body>
+</html>
