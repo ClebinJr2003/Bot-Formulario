@@ -1101,7 +1101,7 @@ app.get("/auth/discord/callback", async (req, res) => {
     req.session.inGuild = true;
 
     delete req.session.oauthState;
-    return res.redirect(process.env.ADMIN_URL || process.env.SITE_URL || "/");
+    res.redirect(process.env.SITE_URL);
   } catch (e) {
     console.error(e);
     return res.status(500).send("Erro interno no login do Discord.");
