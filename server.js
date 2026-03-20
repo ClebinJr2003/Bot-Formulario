@@ -435,11 +435,7 @@ app.use(
     proxy: true,
     cookie: {
       httpOnly: true,
-<<<<<<< HEAD
-      sameSite: "lax",
-=======
       sameSite: "none",
->>>>>>> 861faeaa38fc7769d0beb5fc09d068eaac79c795
       secure: true,
       maxAge: 1000 * 60 * 60 * 24
     }
