@@ -1,4 +1,5 @@
 import "dotenv/config";
+import SQLiteStoreFactory from "connect-sqlite3";
 import express from "express";
 import session from "express-session";
 import Database from "better-sqlite3";   
@@ -35,7 +36,7 @@ app.use((req, res, next) => {
   process.env.BASE_URL || "",
   process.env.SITE_URL || "",
   process.env.ADMIN_URL || "",
-  "https://recrutamento-gpv.vercel.app"
+  "https://random-2vdx1z1co059v.vertraweb.app"
 ].filter(Boolean);
 
   const origin = req.headers.origin;
@@ -425,10 +426,15 @@ async function startBotIfNeeded() {
 }
 
 // ================== SESSÃO / STATIC ==================
-app.set("trust proxy", 1);
+const SQLiteStore = SQLiteStoreFactory(session);
 
 app.use(
   session({
+    store: new SQLiteStore({
+      db: "sessions.sqlite",
+      dir: "/tmp"
+    }),
+    name: "gpv.sid",
     secret: SESSION_SECRET || "dev_secret_change_me",
     resave: false,
     saveUninitialized: false,
@@ -979,11 +985,11 @@ app.post("/api/panel/reprove/:actionMessageId", requirePanelAccess, async (req, 
 });
 
 app.get("/admin", requirePanelAccess, (req, res) => {
-  return res.redirect("https://recrutamento-gpv.vercel.app/admin.html");
+  return res.redirect("https://random-2vdx1z1co059v.vertraweb.app/admin.html");
 });
 
 app.get("/Admin", requirePanelAccess, (req, res) => {
-  return res.redirect("https://recrutamento-gpv.vercel.app/admin.html");
+  return res.redirect("https://random-2vdx1z1co059v.vertraweb.app/admin.html");
 });
 
 // ================== OAUTH START ==================
@@ -1028,7 +1034,9 @@ app.get("/auth/discord/callback", async (req, res) => {
     const { code, state } = req.query;
 
     if (!code) return res.status(400).send("Faltou code no callback.");
-    if (!state || state !== req.session.oauthState) return res.status(400).send("State inválido. Tente novamente.");
+    if (!state || state !== req.session.oauthState) {
+      return res.status(400).send("State inválido. Tente novamente.");
+    }
 
     if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET || !DISCORD_REDIRECT_URI) {
       return res.status(500).send("OAuth não configurado (CLIENT_ID/SECRET/REDIRECT).");
@@ -1075,12 +1083,12 @@ app.get("/auth/discord/callback", async (req, res) => {
       delete req.session.oauthState;
       return res.redirect(`/error/rate_limit?sec=${userOut.retryAfterSec || 60}`);
     }
+
     if (!userOut.ok) {
       console.log("❌ user error:", userOut?.status, userOut?.error, userOut?.raw, userOut?.data);
       return res.status(400).send("Erro ao pegar usuário do Discord.");
     }
 
-    // valida se está no servidor usando o BOT (tira /users/@me/guilds)
     await startBotIfNeeded();
     const guild = await client.guilds.fetch(GUILD_ID);
 
@@ -1098,11 +1106,19 @@ app.get("/auth/discord/callback", async (req, res) => {
       username: userOut.data.username,
       global_name: userOut.data.global_name || null
     };
-    req.session.inGuild = true;
 
+    req.session.inGuild = true;
     delete req.session.oauthState;
-    console.log("REDIRECT FINAL =", process.env.SITE_URL);
-    return res.redirect(process.env.SITE_URL);
+
+    req.session.save((err) => {
+      if (err) {
+        console.error("Erro ao salvar sessão final:", err);
+        return res.status(500).send("Erro ao finalizar login.");
+      }
+
+      console.log("REDIRECT FINAL =", process.env.SITE_URL);
+      return res.redirect(process.env.SITE_URL);
+    });
   } catch (e) {
     console.error(e);
     return res.status(500).send("Erro interno no login do Discord.");
